@@ -5,7 +5,7 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database 
   const client = env('DATABASE_CLIENT', 'sqlite');
 
   const connections = {
-    mysql2: {
+    mysql: {
       connection: {
         host: env('DATABASE_HOST', 'localhost'),
         port: env.int('DATABASE_PORT', 3306),
