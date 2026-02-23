@@ -1,9 +1,3 @@
-
-# .gitignore
-.env
-.env.*
-!.env.example
-
 ############################
 # OS X
 ############################
@@ -128,6 +122,9 @@ coverage
 ############################
 
 .env
+.env.*
+!.env.example
+
 license.txt
 exports
 .strapi
