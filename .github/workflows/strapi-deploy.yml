@@ -13,49 +13,26 @@ jobs:
       - name: 📦 Checkout code
         uses: actions/checkout@v4
 
-      - name: 📂 Deploy files to cPanel via SSH
-        uses: appleboy/scp-action@v0.1.7
+      - name: 📂 Deploy files to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "."
-          target: ${{ secrets.STRAPI_PATH }}
-          # Exclude unnecessary files
-          rm: false
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.STRAPI_PATH }}/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .env
+            .cache/**
+            dist/**
+            build/**
+            .tmp/**
 
-      - name: 🔧 Install dependencies & build on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ${{ secrets.STRAPI_PATH }}
-            
-            # Load Node.js (cPanel uses nvm or scl)
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            
-            # If nvm is not available, try sourcing nodevenv
-            if ! command -v node &> /dev/null; then
-              source /home/${{ secrets.CPANEL_USER }}/nodevenv/${{ secrets.STRAPI_APP_NAME }}/22/bin/activate
-            fi
-            
-            echo "Node version: $(node -v)"
-            echo "NPM version: $(npm -v)"
-            
-            # Install dependencies
-            npm ci --omit=dev
-            
-            # Build Strapi
-            NODE_ENV=production npm run build
-            
-            # Restart the Node.js app via cPanel API
-            # Option 1: Touch restart file (Passenger)
-            mkdir -p tmp
-            touch tmp/restart.txt
-            
-            echo "✅ Strapi deployed and restarted!"
+      - name: ✅ Files uploaded
+        run: |
+          echo "✅ Source files deployed to cPanel"
+          echo "⚠️  Run this in cPanel Terminal to complete:"
+          echo "   cd ~/${{ secrets.STRAPI_PATH }} && npm install && npm run build && touch tmp/restart.txt"
