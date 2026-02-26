@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "peticiones",
+  "info": {
+    "singularName": "peticion",
+    "pluralName": "peticiones",
+    "displayName": "Peticiones"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "nombre": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "tipoPeticion": {
+      "type": "string"
+    },
+    "peticion": {
+      "type": "string"
+    }
+  }
+}

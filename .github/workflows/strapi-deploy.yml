@@ -1,0 +1,61 @@
+# .github/workflows/deploy.yml (Repo del Backend Strapi)
+name: 🚀 Deploy Strapi to cPanel
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📂 Deploy files to cPanel via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "."
+          target: ${{ secrets.STRAPI_PATH }}
+          # Exclude unnecessary files
+          rm: false
+
+      - name: 🔧 Install dependencies & build on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.STRAPI_PATH }}
+            
+            # Load Node.js (cPanel uses nvm or scl)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # If nvm is not available, try sourcing nodevenv
+            if ! command -v node &> /dev/null; then
+              source /home/${{ secrets.CPANEL_USER }}/nodevenv/${{ secrets.STRAPI_APP_NAME }}/22/bin/activate
+            fi
+            
+            echo "Node version: $(node -v)"
+            echo "NPM version: $(npm -v)"
+            
+            # Install dependencies
+            npm ci --omit=dev
+            
+            # Build Strapi
+            NODE_ENV=production npm run build
+            
+            # Restart the Node.js app via cPanel API
+            # Option 1: Touch restart file (Passenger)
+            mkdir -p tmp
+            touch tmp/restart.txt
+            
+            echo "✅ Strapi deployed and restarted!"

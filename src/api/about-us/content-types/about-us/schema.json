@@ -1,0 +1,14 @@
+{
+  "kind": "collectionType",
+  "collectionName": "about_us_page",
+  "info": {
+    "singularName": "about-us",
+    "pluralName": "about-us-page",
+    "displayName": "Nosotros"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {}
+}
