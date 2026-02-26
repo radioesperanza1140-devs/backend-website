@@ -19,6 +19,7 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
           server-dir: ${{ secrets.STRAPI_PATH }}/
           dangerous-clean-slate: false
           exclude: |
