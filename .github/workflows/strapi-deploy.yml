@@ -16,11 +16,11 @@ jobs:
       - name: 📂 Deploy files to cPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
+          server: ${{ vars.FTP_HOST }}
+          username: ${{ vars.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
-          server-dir: ${{ secrets.STRAPI_PATH }}/
+          server-dir: ${{ vars.STRAPI_PATH }}/
           dangerous-clean-slate: false
           exclude: |
             **/.git*
@@ -36,4 +36,4 @@ jobs:
         run: |
           echo "✅ Source files deployed to cPanel"
           echo "⚠️  Run this in cPanel Terminal to complete:"
-          echo "   cd ~/${{ secrets.STRAPI_PATH }} && npm install && npm run build && touch tmp/restart.txt"
+          echo "   cd ~/${{ vars.STRAPI_PATH }} && npm install && npm run build && touch tmp/restart.txt"
