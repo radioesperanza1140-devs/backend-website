@@ -1,0 +1,21 @@
+{
+    "kind": "collectionType",
+    "collectionName": "palabras_de_sabiduria",
+    "info": {
+        "singularName": "palabra-de-sabiduria",
+        "pluralName": "palabras-de-sabiduria",
+        "displayName": "Palabra de Sabiduria"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "texto": {
+            "type": "text"
+        },
+        "diaPublicacion": {
+            "type": "date"
+        }
+    }
+}

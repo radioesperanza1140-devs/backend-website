@@ -1,0 +1,44 @@
+{
+    "kind": "singleType",
+    "collectionName": "radio_players",
+    "info": {
+        "singularName": "radio-player",
+        "pluralName": "radio-players",
+        "displayName": "radio-player"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "audio_url": {
+            "type": "string"
+        },
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "type": "text"
+        },
+        "image": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        },
+        "icon": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        }
+    }
+}

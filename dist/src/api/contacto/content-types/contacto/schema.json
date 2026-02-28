@@ -1,0 +1,30 @@
+{
+    "kind": "collectionType",
+    "collectionName": "contactos",
+    "info": {
+        "singularName": "contacto",
+        "pluralName": "contactos",
+        "displayName": "Contactos"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "fullname": {
+            "type": "string"
+        },
+        "email": {
+            "type": "email"
+        },
+        "mensaje": {
+            "type": "text"
+        },
+        "telefono": {
+            "type": "string"
+        },
+        "asunto": {
+            "type": "string"
+        }
+    }
+}

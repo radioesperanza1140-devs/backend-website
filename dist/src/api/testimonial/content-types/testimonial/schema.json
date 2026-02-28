@@ -1,0 +1,21 @@
+{
+    "kind": "collectionType",
+    "collectionName": "testimonials",
+    "info": {
+        "singularName": "testimonial",
+        "pluralName": "testimonials",
+        "displayName": "Testimonios"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "author": {
+            "type": "string"
+        },
+        "description": {
+            "type": "text"
+        }
+    }
+}

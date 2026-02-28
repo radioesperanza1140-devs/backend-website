@@ -1,0 +1,24 @@
+{
+    "kind": "collectionType",
+    "collectionName": "promises",
+    "info": {
+        "singularName": "promise",
+        "pluralName": "promises",
+        "displayName": "Promesas"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "texto_biblico": {
+            "type": "string"
+        },
+        "contenido_texto_biblico": {
+            "type": "text"
+        },
+        "dia_publicacion": {
+            "type": "date"
+        }
+    }
+}

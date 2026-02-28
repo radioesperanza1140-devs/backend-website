@@ -1,0 +1,46 @@
+{
+    "kind": "collectionType",
+    "collectionName": "programations",
+    "info": {
+        "singularName": "programation",
+        "pluralName": "programations",
+        "displayName": "Programaciones"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "type": "text"
+        },
+        "horario_emision_inicio": {
+            "type": "time"
+        },
+        "horario_emision_fin": {
+            "type": "time"
+        },
+        "imagen": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        },
+        "dias_EnEmision": {
+            "type": "string"
+        },
+        "orden": {
+            "type": "integer"
+        },
+        "currentProgram": {
+            "type": "boolean"
+        }
+    }
+}
