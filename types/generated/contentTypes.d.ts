@@ -520,6 +520,84 @@ export interface ApiContactoContacto extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
+  collectionName: 'donations';
+  info: {
+    description: 'Donaciones recibidas a trav\u00E9s de Bold';
+    displayName: 'Donation';
+    pluralName: 'donations';
+    singularName: 'donation';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amount: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    boldNotificationId: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    boldPaymentId: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    cardBrand: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 30;
+      }>;
+    cardMaskedPan: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    currency: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 3;
+      }> &
+      Schema.Attribute.DefaultTo<'COP'>;
+    eventType: Schema.Attribute.Enumeration<
+      ['SALE_APPROVED', 'SALE_REJECTED', 'VOID_APPROVED', 'VOID_REJECTED']
+    > &
+      Schema.Attribute.Required;
+    integration: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 30;
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::donation.donation'
+    > &
+      Schema.Attribute.Private;
+    payerEmail: Schema.Attribute.String;
+    paymentMethod: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 30;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    rawPayload: Schema.Attribute.JSON;
+    reference: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    status: Schema.Attribute.Enumeration<
+      ['approved', 'pending', 'rejected', 'voided']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    tip: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
   collectionName: 'globals';
   info: {
@@ -1254,6 +1332,7 @@ declare module '@strapi/strapi' {
       'api::about-us.about-us': ApiAboutUsAboutUs;
       'api::banner.banner': ApiBannerBanner;
       'api::contacto.contacto': ApiContactoContacto;
+      'api::donation.donation': ApiDonationDonation;
       'api::global.global': ApiGlobalGlobal;
       'api::palabra-de-sabiduria.palabra-de-sabiduria': ApiPalabraDeSabiduriaPalabraDeSabiduria;
       'api::peticion.peticion': ApiPeticionPeticion;

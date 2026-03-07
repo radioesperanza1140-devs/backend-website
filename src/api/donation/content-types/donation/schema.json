@@ -1,0 +1,97 @@
+{
+  "kind": "collectionType",
+  "collectionName": "donations",
+  "info": {
+    "singularName": "donation",
+    "pluralName": "donations",
+    "displayName": "Donation",
+    "description": "Donaciones recibidas a través de Bold"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "boldPaymentId": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 50
+    },
+    "boldNotificationId": {
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    "eventType": {
+      "type": "enumeration",
+      "enum": [
+        "SALE_APPROVED",
+        "SALE_REJECTED",
+        "VOID_APPROVED",
+        "VOID_REJECTED"
+      ],
+      "required": true
+    },
+    "amount": {
+      "type": "decimal",
+      "required": true,
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "required": false,
+      "default": "COP",
+      "maxLength": 3
+    },
+    "tip": {
+      "type": "decimal",
+      "required": false,
+      "default": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "approved",
+        "pending",
+        "rejected",
+        "voided"
+      ],
+      "required": true,
+      "default": "pending"
+    },
+    "paymentMethod": {
+      "type": "string",
+      "required": false,
+      "maxLength": 30
+    },
+    "integration": {
+      "type": "string",
+      "required": false,
+      "maxLength": 30
+    },
+    "payerEmail": {
+      "type": "string",
+      "required": false
+    },
+    "cardBrand": {
+      "type": "string",
+      "required": false,
+      "maxLength": 30
+    },
+    "cardMaskedPan": {
+      "type": "string",
+      "required": false,
+      "maxLength": 20
+    },
+    "reference": {
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    "rawPayload": {
+      "type": "json",
+      "required": false
+    }
+  }
+}
