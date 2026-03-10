@@ -22,7 +22,7 @@ const rawBody = (config: any, { strapi }: { strapi: Core.Strapi }) => {
 
       const raw = Buffer.concat(chunks).toString('utf-8');
       ctx.request.rawBody = raw;
-
+      strapi.log.warn('[BoldWebhook] Payload recibido '+raw);
       // Re-parse so ctx.request.body is still available
       try {
         ctx.request.body = JSON.parse(raw);
