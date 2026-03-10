@@ -73,6 +73,9 @@ export default {
       .update(data)
       .digest('hex');
 
+      strapi.log.warn('[BoldWebhook] getSignature raw'+data);
+      strapi.log.warn('[BoldWebhook] getSignature hash ' +hash);
+      
     ctx.body = { integritySignature: hash, orderId };
   },
 };
