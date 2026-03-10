@@ -2,86 +2,77 @@ import type { Context } from "koa";
 import crypto from "crypto";
 
 export default {
+  /**
+   * Handles incoming Bold webhook events (SALE_APPROVED, SALE_REJECTED, etc.)
+   * POST /api/bold-webhook
+   */
   async handleBoldEvent(ctx: Context) {
+    const service = strapi.service('api::bold-webhook.bold-webhook') as any;
+
     try {
-      const body = ctx.request.body;
+      // 1. Validate signature
+      const rawBody: string =
+        (ctx.request as any).rawBody ?? JSON.stringify(ctx.request.body);
+      const boldSignature = ctx.request.headers['x-bold-signature'] as string;
 
-      // Usar el body ya parseado por Strapi, re-serializado
-
-      const boldSignature = ctx.request.headers["x-bold-signature"] as
-        | string
-        | undefined;
-
-      const boldService = strapi.service("api::bold-webhook.bold-webhook");
-
-      console.log(body);
-      console.log(boldSignature);
-      // 1. Validar firma
-      const isValid = boldService.validateSignature(body, boldSignature);
-
-      if (!isValid) {
-        strapi.log.warn(`[BoldWebhook] Firma inválida | IP: ${ctx.request.ip}`);
+      if (!service.validateSignature(rawBody, boldSignature)) {
         ctx.status = 401;
-        ctx.body = { error: "Invalid signature" };
+        ctx.body = { error: 'Invalid or missing signature' };
         return;
       }
 
-      // 2. Validar estructura
-      if (!boldService.validatePayload(body)) {
-        strapi.log.warn("[BoldWebhook] Payload inválido");
+      // 2. Validate payload structure
+      const body = ctx.request.body;
+      if (!service.validatePayload(body)) {
+        strapi.log.warn('[BoldWebhook] Payload inválido recibido');
         ctx.status = 400;
-        ctx.body = { error: "Invalid payload structure" };
+        ctx.body = { error: 'Invalid payload' };
         return;
       }
 
-      // 3. Extraer y persistir
-      const donationData = boldService.extractDonationData(body);
-      const result = await boldService.upsertDonation(donationData);
+      // 3. Extract and upsert donation
+      const donationData = service.extractDonationData(body);
+      const result = await service.upsertDonation(donationData);
 
       strapi.log.info(
-        `[BoldWebhook] OK | ${body.type} | payment: ${body.subject} | ` +
-          `$${donationData.amount} ${donationData.currency} | ` +
-          `${donationData.paymentMethod} | ${result.created ? "NUEVA" : "ACTUALIZADA"}`,
+        `[BoldWebhook] ${result.created ? 'Creada' : 'Actualizada'} donación id=${result.id} | type=${body.type}`
       );
 
-      // 4. Responder 200 (Bold requiere < 2s)
+      // 4. Always respond 200 to acknowledge receipt
       ctx.status = 200;
       ctx.body = { received: true };
+
     } catch (error) {
-      strapi.log.error("[BoldWebhook] Error:", error);
+      strapi.log.error('[BoldWebhook] Error procesando evento:', error);
       ctx.status = 500;
-      ctx.body = { error: "Internal server error" };
+      ctx.body = { error: 'Internal server error' };
     }
   },
 
+  /**
+   * Generates the SHA-256 integrity signature for Bold Checkout.
+   * POST /api/bold-webhook/get-signature
+   */
   async getSignature(ctx: Context) {
-    const { orderId, amount, currency } = ctx.request.body;
+    const { orderId, amount, currency } = ctx.request.body as any;
     const secretKey = process.env.BOLD_SECRET_KEY;
-    
+
     if (!secretKey) {
       ctx.status = 500;
-      ctx.body = { error: "BOLD_SECRET_KEY no configurada" };
+      ctx.body = { error: 'BOLD_SECRET_KEY no configurada' };
       return;
     }
 
-    // Bold requiere: {orderId}{amount}{currency}{secretKey}
-    const data = `${orderId}${amount}${currency}${secretKey}`;
+    // Ensure amount is a clean integer string (no decimals)
+    const amountStr = String(Math.round(Number(amount)));
 
-    console.log("[Bold Signature Debug]", {
-      orderId,
-      amount: amount,
-      currency,
-      secretKeyLast4: secretKey?.slice(-4), // solo últimos 4 chars por seguridad
-      concatenated: `${orderId}${amount}${currency}${"*".repeat(secretKey?.length || 0)}`,
-    });
-
+    // Bold integrity: {orderId}{amount}{currency}{secretKey}  (SHA-256 plain)
+    const data = `${orderId}${amountStr}${currency}${secretKey}`;
     const hash = crypto
-      .createHash("sha256") // <-- createHash, NO createHmac
+      .createHash('sha256')
       .update(data)
-      .digest("hex");
+      .digest('hex');
 
-    console.log("[Bold Signature Debug] hash:", hash);
-    
     ctx.body = { integritySignature: hash, orderId };
   },
 };
