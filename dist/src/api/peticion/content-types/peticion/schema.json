@@ -21,7 +21,7 @@
             "type": "string"
         },
         "peticion": {
-            "type": "string"
+            "type": "text"
         }
     }
 }

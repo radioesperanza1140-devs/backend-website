@@ -57,7 +57,7 @@ export default {
   async getSignature(ctx: Context) {
     const { orderId, amount, currency } = ctx.request.body;
     const secretKey = process.env.BOLD_SECRET_KEY;
-    console.log("Secret " + secretKey);
+    
     if (!secretKey) {
       ctx.status = 500;
       ctx.body = { error: "BOLD_SECRET_KEY no configurada" };

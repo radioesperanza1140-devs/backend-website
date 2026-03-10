@@ -10,5 +10,22 @@
         "draftAndPublish": true
     },
     "pluginOptions": {},
-    "attributes": {}
+    "attributes": {
+        "mision": {
+            "type": "text"
+        },
+        "vision": {
+            "type": "text"
+        },
+        "imagen": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        }
+    }
 }

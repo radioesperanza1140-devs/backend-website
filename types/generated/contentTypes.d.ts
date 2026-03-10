@@ -444,16 +444,19 @@ export interface ApiAboutUsAboutUs extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    imagen: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::about-us.about-us'
     > &
       Schema.Attribute.Private;
+    mision: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    vision: Schema.Attribute.Text;
   };
 }
 
@@ -682,7 +685,7 @@ export interface ApiPeticionPeticion extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     nombre: Schema.Attribute.String;
-    peticion: Schema.Attribute.String;
+    peticion: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
     tipoPeticion: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
