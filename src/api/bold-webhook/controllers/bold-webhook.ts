@@ -14,7 +14,8 @@ export default {
       const rawBody: string =
         (ctx.request as any).rawBody ?? JSON.stringify(ctx.request.body);
       const boldSignature = ctx.request.headers['x-bold-signature'] as string;
-
+      
+      strapi.log.info('[BoldWebhook] Payload '+rawBody);
       if (!service.validateSignature(rawBody, boldSignature)) {
         ctx.status = 401;
         ctx.body = { error: 'Invalid or missing signature' };

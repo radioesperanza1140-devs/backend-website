@@ -11,6 +11,7 @@ import type { Core } from '@strapi/strapi';
 const rawBody = (config: any, { strapi }: { strapi: Core.Strapi }) => {
   return async (ctx: any, next: () => Promise<void>) => {
     // Only capture raw body for the webhook endpoint
+    console.log("URL "+ctx.request.url);
     if (ctx.request.url?.startsWith('/api/bold-webhook') && ctx.request.method === 'POST') {
       const chunks: Buffer[] = [];
 

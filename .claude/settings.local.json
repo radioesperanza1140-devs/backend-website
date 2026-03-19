@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers.bold.co)",
+      "Bash(xargs -I {} ls -la {})",
+      "Bash(find . -path ./node_modules -prune -o -type f \\\\\\(-name *.schema.* -o -name schema.ts \\\\\\) -print)"
+    ]
+  }
+}

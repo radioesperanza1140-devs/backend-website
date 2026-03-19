@@ -1,0 +1,229 @@
+{
+  "info": {
+    "name": "Bold Webhook - Radio Esperanza",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:1337",
+      "type": "string"
+    },
+    {
+      "key": "bold_secret_key",
+      "value": "",
+      "type": "string",
+      "description": "En pruebas: string vacío. En producción: clave del dashboard de Bold."
+    }
+  ],
+  "item": [
+    {
+      "name": "POST /api/bold-webhook (SALE_APPROVED)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Lee el body que se va a enviar",
+              "const rawBody = pm.request.body.raw;",
+              "",
+              "// Paso 1: Body (UTF-8 string) → Base64",
+              "const bodyBase64 = btoa(unescape(encodeURIComponent(rawBody)));",
+              "",
+              "// Paso 2: HMAC-SHA256(base64Body, secretKey) → hex",
+              "const secretKey = pm.collectionVariables.get('bold_secret_key') ?? '';",
+              "",
+              "const signature = CryptoJS.HmacSHA256(bodyBase64, secretKey).toString(CryptoJS.enc.Hex);",
+              "",
+              "// Paso 3: Inyectar en variable para usarla en el header",
+              "pm.collectionVariables.set('x_bold_signature', signature);",
+              "",
+              "console.log('Body Base64:', bodyBase64);",
+              "console.log('x-bold-signature:', signature);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('received: true', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.received).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-bold-signature",
+            "value": "{{x_bold_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"notif-test-001\",\"type\":\"SALE_APPROVED\",\"subject\":\"order-123\",\"data\":{\"payment_id\":\"PAY-TEST-001\",\"amount\":{\"total\":59900,\"currency\":\"COP\",\"tip\":0},\"payment_method\":\"CARD\",\"integration\":\"CHECKOUT\",\"payer_email\":\"donante@test.com\",\"card\":{\"brand\":\"VISA\",\"masked_pan\":\"411111******1111\"},\"metadata\":{\"reference\":\"donation-ref-001\"}}}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/bold-webhook",
+          "host": ["{{base_url}}"],
+          "path": ["api", "bold-webhook"]
+        }
+      }
+    },
+    {
+      "name": "POST /api/bold-webhook (SALE_REJECTED)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const rawBody = pm.request.body.raw;",
+              "const bodyBase64 = btoa(unescape(encodeURIComponent(rawBody)));",
+              "const secretKey = pm.collectionVariables.get('bold_secret_key') ?? '';",
+              "const signature = CryptoJS.HmacSHA256(bodyBase64, secretKey).toString(CryptoJS.enc.Hex);",
+              "pm.collectionVariables.set('x_bold_signature', signature);",
+              "console.log('x-bold-signature:', signature);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('received: true', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.received).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-bold-signature",
+            "value": "{{x_bold_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"notif-test-002\",\"type\":\"SALE_REJECTED\",\"subject\":\"order-456\",\"data\":{\"payment_id\":\"PAY-TEST-002\",\"amount\":{\"total\":30000,\"currency\":\"COP\",\"tip\":0},\"payment_method\":\"CARD\",\"integration\":\"CHECKOUT\",\"payer_email\":\"donante2@test.com\",\"card\":{\"brand\":\"MASTERCARD\",\"masked_pan\":\"555555******4444\"},\"metadata\":{\"reference\":\"donation-ref-002\"}}}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/bold-webhook",
+          "host": ["{{base_url}}"],
+          "path": ["api", "bold-webhook"]
+        }
+      }
+    },
+    {
+      "name": "POST /api/bold-webhook (VOID_APPROVED)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const rawBody = pm.request.body.raw;",
+              "const bodyBase64 = btoa(unescape(encodeURIComponent(rawBody)));",
+              "const secretKey = pm.collectionVariables.get('bold_secret_key') ?? '';",
+              "const signature = CryptoJS.HmacSHA256(bodyBase64, secretKey).toString(CryptoJS.enc.Hex);",
+              "pm.collectionVariables.set('x_bold_signature', signature);",
+              "console.log('x-bold-signature:', signature);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('received: true', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.received).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-bold-signature",
+            "value": "{{x_bold_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"notif-test-003\",\"type\":\"VOID_APPROVED\",\"subject\":\"order-123\",\"data\":{\"payment_id\":\"PAY-TEST-001\",\"amount\":{\"total\":59900,\"currency\":\"COP\",\"tip\":0},\"payment_method\":\"CARD\",\"integration\":\"CHECKOUT\",\"payer_email\":\"donante@test.com\",\"card\":{\"brand\":\"VISA\",\"masked_pan\":\"411111******1111\"},\"metadata\":{\"reference\":\"donation-ref-001\"}}}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/bold-webhook",
+          "host": ["{{base_url}}"],
+          "path": ["api", "bold-webhook"]
+        }
+      }
+    },
+    {
+      "name": "POST /api/bold-webhook (firma inválida - debe retornar 401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 401', () => pm.response.to.have.status(401));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-bold-signature",
+            "value": "firma_invalida_000000000000000000000000000000000000000000000000000000"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"notif-test-bad\",\"type\":\"SALE_APPROVED\",\"subject\":\"order-bad\",\"data\":{\"payment_id\":\"PAY-BAD-001\",\"amount\":{\"total\":1000,\"currency\":\"COP\",\"tip\":0}}}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/bold-webhook",
+          "host": ["{{base_url}}"],
+          "path": ["api", "bold-webhook"]
+        }
+      }
+    }
+  ]
+}
