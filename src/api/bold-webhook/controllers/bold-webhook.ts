@@ -10,12 +10,12 @@ export default {
     const service = strapi.service('api::bold-webhook.bold-webhook') as any;
 
     try {
-      // 1. Validate signature
-      const rawBody: string =
+      // 1. Validate signature (rawBody es Buffer del middleware, igual que express.raw())
+      const rawBody: Buffer | string =
         (ctx.request as any).rawBody ?? JSON.stringify(ctx.request.body);
       const boldSignature = ctx.request.headers['x-bold-signature'] as string;
       
-      strapi.log.info('[BoldWebhook] Payload '+rawBody);
+      strapi.log.info('[BoldWebhook] Webhook recibido');
       if (!service.validateSignature(rawBody, boldSignature)) {
         ctx.status = 401;
         ctx.body = { error: 'Invalid or missing signature' };
@@ -45,17 +45,29 @@ export default {
 
     } catch (error) {
       strapi.log.error('[BoldWebhook] Error procesando evento:', error);
-      ctx.status = 500;
-      ctx.body = { error: 'Internal server error' };
+      // Siempre responder 200 para evitar reintentos de Bold (hasta 5 veces)
+      ctx.status = 200;
+      ctx.body = { received: true };
     }
   },
 
   /**
-   * Generates the SHA-256 integrity signature for Bold Checkout.
+   * Generates the SHA-256 integrity signature for Bold Checkout
+   * and creates a pending donation with donor info from the wizard.
    * POST /api/bold-webhook/get-signature
    */
   async getSignature(ctx: Context) {
-    const { orderId, amount, currency } = ctx.request.body as any;
+    const {
+      orderId,
+      amount,
+      currency,
+      donorFullName,
+      donorPhone,
+      donorIdentification,
+      donorIdentificationType,
+      payerEmail,
+    } = ctx.request.body as any;
+
     const secretKey = process.env.BOLD_SECRET_KEY;
 
     if (!secretKey) {
@@ -64,19 +76,50 @@ export default {
       return;
     }
 
-    // Ensure amount is a clean integer string (no decimals)
-    const amountStr = String(Math.round(Number(amount)));
+    // Validar orderId y amount
+    if (!orderId || typeof orderId !== 'string' || orderId.trim() === '') {
+      ctx.status = 400;
+      ctx.body = { error: 'orderId es requerido' };
+      return;
+    }
 
-    // Bold integrity: {orderId}{amount}{currency}{secretKey}  (SHA-256 plain)
+    const amountNum = Math.round(Number(amount));
+    if (!amount || isNaN(amountNum) || amountNum <= 0) {
+      ctx.status = 400;
+      ctx.body = { error: 'amount debe ser un número mayor a 0' };
+      return;
+    }
+
+    // Validar campos requeridos del donante
+    if (!donorFullName || !donorIdentification || !donorIdentificationType) {
+      ctx.status = 400;
+      ctx.body = { error: 'Datos del donante incompletos (nombre, identificación, tipo)' };
+      return;
+    }
+
+    const service = strapi.service('api::bold-webhook.bold-webhook') as any;
+
+    // Crear donación pendiente con datos del wizard
+    await service.createPendingDonation({
+      donorFullName,
+      donorPhone: donorPhone ?? '',
+      donorIdentification,
+      donorIdentificationType,
+      amount: amountNum,
+      currency: currency ?? 'COP',
+      payerEmail: payerEmail ?? '',
+      reference: orderId,
+      status: 'pending' as const,
+    });
+
+    // Generar firma de integridad para Bold Checkout
+    const amountStr = String(amountNum);
     const data = `${orderId}${amountStr}${currency}${secretKey}`;
     const hash = crypto
       .createHash('sha256')
       .update(data)
       .digest('hex');
 
-      strapi.log.warn('[BoldWebhook] getSignature raw'+data);
-      strapi.log.warn('[BoldWebhook] getSignature hash ' +hash);
-      
     ctx.body = { integritySignature: hash, orderId };
   },
 };

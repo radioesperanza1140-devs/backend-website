@@ -118,11 +118,33 @@ export interface BoldWebhookEvent {
   datacontenttype?: string;      // "application/json"
 }
 
+// ─── Tipos de identificación del donante ─────────────────────────────────────
+
+export type DonorIdentificationType = 'CC' | 'CE' | 'NIT' | 'PP' | 'TI';
+
 // ─── Tipos para la colección Donation en Strapi ─────────────────────────────
 
 export type DonationStatus = 'approved' | 'pending' | 'rejected' | 'voided';
 
-export interface DonationCreateData {
+/** Datos del donante capturados en el wizard antes de pagar */
+export interface DonorInfo {
+  donorFullName: string;
+  donorPhone: string;
+  donorIdentification: string;
+  donorIdentificationType: DonorIdentificationType;
+}
+
+/** Datos para crear la donación pendiente (wizard + get-signature) */
+export interface DonationPendingData extends DonorInfo {
+  amount: number;
+  currency: string;
+  reference: string;
+  payerEmail: string;
+  status: DonationStatus;
+}
+
+/** Datos del webhook de Bold para actualizar la donación */
+export interface DonationWebhookData {
   boldPaymentId: string;
   boldNotificationId: string;
   eventType: BoldEventType;

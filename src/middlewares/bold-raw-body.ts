@@ -10,9 +10,9 @@ import type { Core } from '@strapi/strapi';
 
 const rawBody = (config: any, { strapi }: { strapi: Core.Strapi }) => {
   return async (ctx: any, next: () => Promise<void>) => {
-    // Only capture raw body for the webhook endpoint
-    console.log("URL "+ctx.request.url);
-    if (ctx.request.url?.startsWith('/api/bold-webhook') && ctx.request.method === 'POST') {
+    // Only capture raw body for the webhook endpoint (igual que express.raw())
+    const url = ctx.request.url?.split('?')[0];
+    if (url === '/api/bold-webhook' && ctx.request.method === 'POST') {
       const chunks: Buffer[] = [];
 
       await new Promise<void>((resolve, reject) => {
@@ -21,12 +21,14 @@ const rawBody = (config: any, { strapi }: { strapi: Core.Strapi }) => {
         ctx.req.on('error', (err: Error) => reject(err));
       });
 
-      const raw = Buffer.concat(chunks).toString('utf-8');
-      ctx.request.rawBody = raw;
-      strapi.log.warn('[BoldWebhook] Payload recibido '+raw);
+      // Guardar como Buffer (equivalente a express.raw({ type: 'application/json' }))
+      const rawBuffer = Buffer.concat(chunks);
+      ctx.request.rawBody = rawBuffer;
+      strapi.log.info('[BoldWebhook] Raw body capturado para validación de firma');
+
       // Re-parse so ctx.request.body is still available
       try {
-        ctx.request.body = JSON.parse(raw);
+        ctx.request.body = JSON.parse(rawBuffer.toString('utf-8'));
       } catch {
         ctx.request.body = {};
       }

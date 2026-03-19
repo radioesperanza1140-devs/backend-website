@@ -12,10 +12,36 @@
   },
   "pluginOptions": {},
   "attributes": {
+    "donorFullName": {
+      "type": "string",
+      "required": false,
+      "maxLength": 150
+    },
+    "donorPhone": {
+      "type": "string",
+      "required": false,
+      "maxLength": 20
+    },
+    "donorIdentification": {
+      "type": "string",
+      "required": false,
+      "maxLength": 30
+    },
+    "donorIdentificationType": {
+      "type": "enumeration",
+      "enum": [
+        "CC",
+        "CE",
+        "NIT",
+        "PP",
+        "TI"
+      ],
+      "required": false
+    },
     "boldPaymentId": {
       "type": "string",
-      "required": true,
-      "unique": true,
+      "required": false,
+      "unique": false,
       "maxLength": 50
     },
     "boldNotificationId": {
@@ -31,7 +57,7 @@
         "VOID_APPROVED",
         "VOID_REJECTED"
       ],
-      "required": true
+      "required": false
     },
     "amount": {
       "type": "decimal",

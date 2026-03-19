@@ -6,6 +6,31 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server =>
   app: {
     keys: env.array('APP_KEYS'),
   },
+  cron: {
+    enabled: true,
+    tasks: {
+      // Limpiar donaciones pendientes abandonadas (diario a las 3 AM)
+      '0 3 * * *': async ({ strapi }: { strapi: Core.Strapi }) => {
+        const uid = 'api::donation.donation' as const;
+        const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
+        const stale = await strapi.documents(uid).findMany({
+          filters: {
+            status: 'pending',
+            createdAt: { $lt: cutoff },
+          },
+        });
+
+        for (const record of stale) {
+          await strapi.documents(uid).delete({ documentId: record.documentId });
+        }
+
+        if (stale.length > 0) {
+          strapi.log.info(`[Cron] Eliminadas ${stale.length} donaciones pendientes abandonadas (>48h)`);
+        }
+      },
+    },
+  },
 });
 
 export default config;

@@ -543,8 +543,6 @@ export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
         maxLength: 100;
       }>;
     boldPaymentId: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 50;
       }>;
@@ -564,10 +562,24 @@ export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
         maxLength: 3;
       }> &
       Schema.Attribute.DefaultTo<'COP'>;
+    donorFullName: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 150;
+      }>;
+    donorIdentification: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 30;
+      }>;
+    donorIdentificationType: Schema.Attribute.Enumeration<
+      ['CC', 'CE', 'NIT', 'PP', 'TI']
+    >;
+    donorPhone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
     eventType: Schema.Attribute.Enumeration<
       ['SALE_APPROVED', 'SALE_REJECTED', 'VOID_APPROVED', 'VOID_REJECTED']
-    > &
-      Schema.Attribute.Required;
+    >;
     integration: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 30;

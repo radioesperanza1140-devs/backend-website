@@ -13,7 +13,8 @@ import type {
   BoldWebhookEvent,
   BoldEventType,
   DonationStatus,
-  DonationCreateData,
+  DonationPendingData,
+  DonationWebhookData,
 } from '../types/bold-webhook';
 
 // ─── Mapeo de eventos Bold → estado de donación ────────────────────────────
@@ -42,35 +43,35 @@ export default () => ({
    * @param rawBody - El body crudo como string (tal como lo envió Bold)
    * @param receivedSignature - Valor del header x-bold-signature
    */
-  validateSignature(rawBody: string, receivedSignature: string | undefined): boolean {
+  validateSignature(rawBody: Buffer | string, receivedSignature: string | undefined): boolean {
     if (!receivedSignature) {
       strapi.log.warn('[BoldWebhook] No se recibió header x-bold-signature');
       return false;
     }
-    
-    // En producción usa BOLD_SECRET_KEY; en pruebas puede estar vacía
+
+    // En producción usa BOLD_SECRET_KEY; en pruebas la llave es un string vacío
     const secretKey = process.env.BOLD_SECRET_KEY ?? '';
 
     try {
-      // Paso 1: Body string → Base64
-      const bodyBase64 = Buffer.from(rawBody, 'utf-8').toString('base64');
+      // Paso 1: Convertir el cuerpo recibido a formato Base64
+      // (Igual que: const encoded = base64.encode(body) en el ejemplo de Bold)
+      const body = Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(rawBody, 'utf-8');
+      const encoded = body.toString('base64');
 
-      // Paso 2: HMAC-SHA256(base64Body, secretKey) → hex
-      const computedSignature = crypto
+      // Paso 2: Cifrar con HMAC-SHA256 usando la llave secreta → hexadecimal
+      const hashed = crypto
         .createHmac('sha256', secretKey)
-        .update(bodyBase64)
+        .update(encoded)
         .digest('hex');
 
-      // Paso 3: Comparación timing-safe
-      const sigBuffer = Buffer.from(computedSignature, 'hex');
-      const receivedBuffer = Buffer.from(receivedSignature, 'hex');
+      // Paso 3: Comparar con el valor del encabezado x-bold-signature
+      // (Igual que el ejemplo de Bold: crypto.timingSafeEqual(Buffer.from(hashed), Buffer.from(receivedSignature)))
+      const isValid = crypto.timingSafeEqual(
+        Buffer.from(hashed),
+        Buffer.from(receivedSignature)
+      );
 
-      if (sigBuffer.length !== receivedBuffer.length) {
-        strapi.log.warn('[BoldWebhook] Longitud de firma no coincide');
-        return false;
-      }
-      console.log(crypto.timingSafeEqual(sigBuffer, receivedBuffer));
-      return crypto.timingSafeEqual(sigBuffer, receivedBuffer);
+      return isValid;
     } catch (error) {
       strapi.log.error('[BoldWebhook] Error validando firma:', error);
       return false;
@@ -116,7 +117,7 @@ export default () => ({
    * Nota: `amount.total` de Bold ya viene en unidades (NO centavos).
    * Ejemplo: 59900 = $59.900 COP
    */
-  extractDonationData(event: BoldWebhookEvent): DonationCreateData {
+  extractDonationData(event: BoldWebhookEvent): DonationWebhookData {
     const { data } = event;
 
     return {
@@ -138,23 +139,91 @@ export default () => ({
   },
 
   /**
-   * Crea o actualiza una donación en la base de datos.
+   * Crea una donación pendiente con los datos del donante desde el wizard.
+   * Se llama antes de iniciar el pago en Bold.
+   */
+  async createPendingDonation(
+    donationData: DonationPendingData
+  ): Promise<{ id: string; documentId: string }> {
+    const uid = 'api::donation.donation' as const;
+
+    // Buscar donación pendiente existente con el mismo orderId para evitar duplicados
+    const existing = await strapi.documents(uid).findMany({
+      filters: { reference: donationData.reference, status: 'pending' },
+      limit: 1,
+    });
+
+    if (existing && existing.length > 0) {
+      const record = existing[0];
+      await strapi.documents(uid).update({
+        documentId: record.documentId,
+        data: {
+          donorFullName: donationData.donorFullName,
+          donorPhone: donationData.donorPhone,
+          donorIdentification: donationData.donorIdentification,
+          donorIdentificationType: donationData.donorIdentificationType,
+          amount: donationData.amount,
+          currency: donationData.currency,
+          payerEmail: donationData.payerEmail,
+        },
+      });
+
+      strapi.log.info(
+        `[BoldWebhook] Donación pendiente actualizada: ${record.documentId} | ${donationData.donorFullName}`
+      );
+      return { id: record.id.toString(), documentId: record.documentId };
+    }
+
+    const created = await strapi.documents(uid).create({
+      data: {
+        donorFullName: donationData.donorFullName,
+        donorPhone: donationData.donorPhone,
+        donorIdentification: donationData.donorIdentification,
+        donorIdentificationType: donationData.donorIdentificationType,
+        amount: donationData.amount,
+        currency: donationData.currency,
+        payerEmail: donationData.payerEmail,
+        reference: donationData.reference,
+        status: 'pending',
+      },
+    });
+
+    strapi.log.info(
+      `[BoldWebhook] Donación pendiente creada: ${created.documentId} | ` +
+      `${donationData.donorFullName} | $${donationData.amount} ${donationData.currency}`
+    );
+    return { id: created.id.toString(), documentId: created.documentId };
+  },
+
+  /**
+   * Actualiza una donación existente con los datos del webhook de Bold.
    *
-   * - Si ya existe un registro con el mismo boldPaymentId, lo actualiza
-   *   (Bold puede enviar múltiples eventos para la misma transacción,
-   *    ej: primero SALE_APPROVED, luego VOID_APPROVED).
-   * - Si no existe, crea uno nuevo.
+   * Busca por reference (orderId) para vincular con la donación pendiente
+   * creada en el wizard. Si no encuentra por reference, busca por boldPaymentId.
+   * Si no existe ninguna, crea una nueva (fallback para webhooks sin wizard).
    */
   async upsertDonation(
-    donationData: DonationCreateData
+    donationData: DonationWebhookData
   ): Promise<{ created: boolean; id: string }> {
     const uid = 'api::donation.donation' as const;
 
-    // Buscar donación existente por boldPaymentId
-    const existing = await strapi.documents(uid).findMany({
-      filters: { boldPaymentId: donationData.boldPaymentId },
-      limit: 1,
-    });
+    // 1. Buscar donación pendiente por reference (orderId del wizard)
+    // Solo buscar si reference no está vacío para evitar matchear registros incorrectos
+    let existing: any[] = [];
+    if (donationData.reference && donationData.reference.trim() !== '') {
+      existing = await strapi.documents(uid).findMany({
+        filters: { reference: donationData.reference, status: 'pending' },
+        limit: 1,
+      });
+    }
+
+    // 2. Fallback: buscar por boldPaymentId (reintentos de Bold)
+    if ((!existing || existing.length === 0) && donationData.boldPaymentId) {
+      existing = await strapi.documents(uid).findMany({
+        filters: { boldPaymentId: donationData.boldPaymentId },
+        limit: 1,
+      });
+    }
 
     if (existing && existing.length > 0) {
       const record = existing[0];
@@ -162,6 +231,7 @@ export default () => ({
       const updated = await strapi.documents(uid).update({
         documentId: record.documentId,
         data: {
+          boldPaymentId: donationData.boldPaymentId,
           boldNotificationId: donationData.boldNotificationId,
           eventType: donationData.eventType,
           status: donationData.status,
@@ -172,7 +242,6 @@ export default () => ({
           payerEmail: donationData.payerEmail,
           cardBrand: donationData.cardBrand,
           cardMaskedPan: donationData.cardMaskedPan,
-          reference: donationData.reference,
           rawPayload: donationData.rawPayload,
         },
       });
@@ -183,7 +252,7 @@ export default () => ({
       return { created: false, id: updated.id.toString() };
     }
 
-    // Crear nueva donación
+    // 3. Fallback: crear nueva donación sin datos del wizard (campos del donante quedan null)
     const created = await strapi.documents(uid).create({
       data: {
         boldPaymentId: donationData.boldPaymentId,
@@ -204,9 +273,9 @@ export default () => ({
     });
 
     strapi.log.info(
-      `[BoldWebhook] Nueva donación: ${donationData.boldPaymentId} | ` +
-      `$${donationData.amount} ${donationData.currency} | ${donationData.paymentMethod}`
+      `[BoldWebhook] Nueva donación (sin wizard): ${donationData.boldPaymentId} | ` +
+      `$${donationData.amount} ${donationData.currency}`
     );
-    return { created: true, id: created.id.toString()  };
+    return { created: true, id: created.id.toString() };
   },
 });
