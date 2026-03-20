@@ -1,0 +1,19 @@
+{
+  "kind": "singleType",
+  "collectionName": "feature_flags",
+  "info": {
+    "singularName": "feature-flag",
+    "pluralName": "feature-flags",
+    "displayName": "feature-flag"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "enableTestDonation": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

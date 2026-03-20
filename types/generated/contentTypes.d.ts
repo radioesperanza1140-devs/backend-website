@@ -613,6 +613,35 @@ export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiFeatureFlagFeatureFlag extends Struct.SingleTypeSchema {
+  collectionName: 'feature_flags';
+  info: {
+    displayName: 'feature-flag';
+    pluralName: 'feature-flags';
+    singularName: 'feature-flag';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    enableTestDonation: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::feature-flag.feature-flag'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
   collectionName: 'globals';
   info: {
@@ -1348,6 +1377,7 @@ declare module '@strapi/strapi' {
       'api::banner.banner': ApiBannerBanner;
       'api::contacto.contacto': ApiContactoContacto;
       'api::donation.donation': ApiDonationDonation;
+      'api::feature-flag.feature-flag': ApiFeatureFlagFeatureFlag;
       'api::global.global': ApiGlobalGlobal;
       'api::palabra-de-sabiduria.palabra-de-sabiduria': ApiPalabraDeSabiduriaPalabraDeSabiduria;
       'api::peticion.peticion': ApiPeticionPeticion;
