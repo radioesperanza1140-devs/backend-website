@@ -8,7 +8,10 @@
       "WebFetch(domain:bold.co)",
       "Bash(npx tsc:*)",
       "Bash(node scripts/generate-test-signature.js)",
-      "Bash(npx strapi:*)"
+      "Bash(npx strapi:*)",
+      "WebSearch",
+      "WebFetch(domain:www.developers.bold.co)",
+      "Bash(find /c/Users/kalfa/source/repos/RadioEsperanza1140/2026/backend-website/node_modules -name *body* -type f)"
     ]
   }
 }

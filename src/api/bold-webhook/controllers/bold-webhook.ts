@@ -21,14 +21,16 @@ export default {
     })}`);
 
     try {
-      // 1. Validate signature (rawBody es Buffer del middleware, igual que express.raw())
-      const rawBody: Buffer | string =
-        (ctx.request as any).rawBody ?? JSON.stringify(ctx.request.body);
+      // 1. Obtener raw body desde koa-body (includeUnparsed) o middleware legacy
+      const unparsedSymbol = Symbol.for('unparsedBody');
+      const unparsedBody = (ctx.request.body as any)?.[unparsedSymbol];
+      const legacyRawBody = (ctx.request as any).rawBody;
+      const rawBody: Buffer | string = unparsedBody ?? legacyRawBody ?? JSON.stringify(ctx.request.body);
       const boldSignature = ctx.request.headers['x-bold-signature'] as string;
 
-      const hasRawBody = !!(ctx.request as any).rawBody;
+      const rawBodySource = unparsedBody ? 'koa-body(unparsed)' : legacyRawBody ? 'middleware' : 'JSON.stringify(fallback)';
       strapi.log.info(
-        `[BoldWebhook][Controller] Paso 1: Validar firma | rawBody desde middleware=${hasRawBody} | ` +
+        `[BoldWebhook][Controller] Paso 1: Validar firma | rawBody source=${rawBodySource} | ` +
         `rawBody tipo=${typeof rawBody} | rawBody bytes=${Buffer.isBuffer(rawBody) ? rawBody.length : rawBody.length} | ` +
         `firma recibida=${boldSignature ? boldSignature.substring(0, 16) + '...' : 'NULA'}`
       );
