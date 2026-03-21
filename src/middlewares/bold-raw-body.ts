@@ -24,12 +24,23 @@ const rawBody = (config: any, { strapi }: { strapi: Core.Strapi }) => {
       // Guardar como Buffer (equivalente a express.raw({ type: 'application/json' }))
       const rawBuffer = Buffer.concat(chunks);
       ctx.request.rawBody = rawBuffer;
-      strapi.log.info('[BoldWebhook] Raw body capturado para validación de firma');
+
+      strapi.log.info(
+        `[BoldWebhook][Middleware] Raw body capturado | bytes=${rawBuffer.length} | ` +
+        `ip=${ctx.request.ip} | content-type=${ctx.request.headers['content-type'] ?? 'N/A'} | ` +
+        `x-bold-signature=${ctx.request.headers['x-bold-signature'] ? 'PRESENTE' : 'AUSENTE'}`
+      );
 
       // Re-parse so ctx.request.body is still available
       try {
         ctx.request.body = JSON.parse(rawBuffer.toString('utf-8'));
-      } catch {
+        strapi.log.info(
+          `[BoldWebhook][Middleware] Body parseado OK | type=${(ctx.request.body as any)?.type ?? 'N/A'} | ` +
+          `id=${(ctx.request.body as any)?.id ?? 'N/A'} | subject=${(ctx.request.body as any)?.subject ?? 'N/A'}`
+        );
+      } catch (e) {
+        strapi.log.error(`[BoldWebhook][Middleware] Error parseando body JSON: ${e}`);
+        strapi.log.error(`[BoldWebhook][Middleware] Raw body (primeros 500 chars): ${rawBuffer.toString('utf-8').substring(0, 500)}`);
         ctx.request.body = {};
       }
     }
