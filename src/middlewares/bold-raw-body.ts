@@ -10,8 +10,16 @@ import type { Core } from '@strapi/strapi';
 
 const rawBody = (config: any, { strapi }: { strapi: Core.Strapi }) => {
   return async (ctx: any, next: () => Promise<void>) => {
-    // Only capture raw body for the webhook endpoint (igual que express.raw())
+    // Log diagnóstico solo para POSTs a rutas bold
     const url = ctx.request.url?.split('?')[0];
+    if (ctx.request.method === 'POST' && url?.startsWith('/api/bold')) {
+      strapi.log.info(
+        `[BoldWebhook][Middleware] POST interceptado | url="${ctx.request.url}" | ` +
+        `url_parsed="${url}" | match_webhook=${url === '/api/bold-webhook'}`
+      );
+    }
+
+    // Only capture raw body for the webhook endpoint (igual que express.raw())
     if (url === '/api/bold-webhook' && ctx.request.method === 'POST') {
       const chunks: Buffer[] = [];
 
