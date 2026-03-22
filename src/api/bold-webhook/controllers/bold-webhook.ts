@@ -159,7 +159,7 @@ export default {
       currency,
       payerEmail: payerEmail ?? '',
       reference: orderId,
-      status: 'pending' as const,
+      boldStatus: 'pending' as const,
     });
 
     strapi.log.info(
