@@ -16,6 +16,7 @@ export default [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::query',
+  'global::bold-raw-body',
   {
     name: 'strapi::body',
     config: {
