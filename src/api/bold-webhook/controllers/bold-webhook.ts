@@ -38,7 +38,7 @@ export default {
       if (!service.validateSignature(rawBody, boldSignature)) {
         strapi.log.warn(
           `[BoldWebhook] Firma invalida | ` +
-          `signatureRecibida=${boldSignature?.substring(0, 16)}... | ` +
+          `signatureRecibida=${boldSignature} |` +
           `elapsed=${Date.now() - startTime}ms`
         );
         ctx.status = 401;

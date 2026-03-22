@@ -73,6 +73,7 @@ const webhookPayload = {
   },
 };
 
+// IMPORTANTE: usar el mismo string exacto para firma y body
 const bodyString = JSON.stringify(webhookPayload);
 const bodyBase64 = Buffer.from(bodyString, 'utf-8').toString('base64');
 const signature = crypto
@@ -87,8 +88,10 @@ console.log('URL:    POST http://localhost:1337/api/bold-webhook');
 console.log('Headers:');
 console.log('  Content-Type: application/json');
 console.log('  x-bold-signature:', signature);
-console.log('Body (raw JSON):\n');
-console.log(JSON.stringify(webhookPayload, null, 2));
+console.log('Body (copiar EXACTO, sin formatear):\n');
+console.log(bodyString);
+console.log('\n⚠️  IMPORTANTE: Pegar el body TAL CUAL (compacto, sin pretty-print).');
+console.log('   Si Postman lo reformatea, la firma no coincidirá.');
 
 console.log('\n══════════════════════════════════════════════════════');
 console.log('  INFO');

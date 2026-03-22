@@ -38,7 +38,7 @@ export function verifySignature(
   try {
     const expected = computeSignature(rawBody, secretKey);
     const bodyLen = Buffer.isBuffer(rawBody) ? rawBody.length : rawBody.length;
-    strapi.log.debug(
+    strapi.log.warn(
       `[Signature] Verificando | bodyBytes=${bodyLen} | ` +
       `expectedPrefix=${expected.substring(0, 16)}... | ` +
       `receivedPrefix=${receivedSignature.substring(0, 16)}...`

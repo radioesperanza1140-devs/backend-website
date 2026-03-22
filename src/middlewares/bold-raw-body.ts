@@ -5,6 +5,7 @@
  *
  * Registrado en config/middleware.ts ANTES de 'strapi::body'.
  */
+import { Readable } from 'stream';
 import type { Core } from '@strapi/strapi';
 
 const boldRawBody = (_config: unknown, { strapi }: { strapi: Core.Strapi }) => {
@@ -19,8 +20,8 @@ const boldRawBody = (_config: unknown, { strapi }: { strapi: Core.Strapi }) => {
 
     strapi.log.info('[BoldRawBody] Interceptando request al webhook de Bold');
 
+    // Leer el stream crudo
     const chunks: Buffer[] = [];
-
     await new Promise<void>((resolve, reject) => {
       ctx.req.on('data', (chunk: Buffer) => chunks.push(chunk));
       ctx.req.on('end', () => resolve());
@@ -28,17 +29,19 @@ const boldRawBody = (_config: unknown, { strapi }: { strapi: Core.Strapi }) => {
     });
 
     const rawBuffer = Buffer.concat(chunks);
-    ctx.request.rawBody = rawBuffer;
-
     strapi.log.info(`[BoldRawBody] Raw body capturado | bytes=${rawBuffer.length}`);
 
-    try {
-      ctx.request.body = JSON.parse(rawBuffer.toString('utf-8'));
-      strapi.log.info('[BoldRawBody] Body JSON parseado correctamente');
-    } catch {
-      strapi.log.error('[BoldRawBody] Error parseando body JSON del webhook');
-      ctx.request.body = {};
-    }
+    // Guardar raw body para validacion HMAC en el controller
+    ctx.request.rawBody = rawBuffer;
+
+    // Recrear el stream con los mismos bytes para que strapi::body lo parsee normalmente
+    const freshStream = new Readable({ read() {} });
+    freshStream.push(rawBuffer);
+    freshStream.push(null);
+    (freshStream as any).headers = ctx.req.headers;
+    ctx.req = freshStream as any;
+
+    strapi.log.info('[BoldRawBody] Stream recreado para strapi::body');
 
     await next();
   };

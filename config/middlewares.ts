@@ -17,12 +17,7 @@ export default [
   'strapi::poweredBy',
   'strapi::query',
   'global::bold-raw-body',
-  {
-    name: 'strapi::body',
-    config: {
-      includeUnparsed: true,
-    },
-  },
+  'strapi::body',
   'strapi::session',
   'strapi::favicon',
   'strapi::public',

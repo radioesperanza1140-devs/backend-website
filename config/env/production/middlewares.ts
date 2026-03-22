@@ -16,12 +16,8 @@ export default [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::query',
-  {
-    name: 'strapi::body',
-    config: {
-      includeUnparsed: true,
-    },
-  },
+  'global::bold-raw-body',
+  'strapi::body',
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
