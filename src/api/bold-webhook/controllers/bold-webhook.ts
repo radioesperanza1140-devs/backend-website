@@ -76,7 +76,7 @@ export default {
       strapi.log.info(
         `[BoldWebhook] Datos mapeados | ` +
         `reference=${donationData.reference} | ` +
-        `status=${donationData.status} | ` +
+        `status=${donationData.boldStatus} | ` +
         `method=${donationData.paymentMethod} | ` +
         `email=${donationData.payerEmail}`
       );

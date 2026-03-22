@@ -140,7 +140,7 @@ export interface DonationPendingData extends DonorInfo {
   currency: string;
   reference: string;
   payerEmail: string;
-  status: DonationStatus;
+  boldStatus: DonationStatus;
 }
 
 /** Datos del webhook de Bold para actualizar la donación */

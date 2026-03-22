@@ -16,7 +16,7 @@ export async function findPendingByReference(reference: string) {
   }
 
   const results = await strapi.documents(DONATION_UID).findMany({
-    filters: { reference, status: 'pending' },
+    filters: { reference, boldStatus: 'pending' },
     limit: 1,
   });
 
@@ -115,7 +115,7 @@ export async function updateFromWebhook(documentId: string, data: DonationWebhoo
       boldPaymentId: data.boldPaymentId,
       boldNotificationId: data.boldNotificationId,
       eventType: data.eventType,
-      status: data.boldStatus,
+      boldStatus: data.boldStatus,
       amount: data.amount,
       tip: data.tip,
       paymentMethod: data.paymentMethod,
