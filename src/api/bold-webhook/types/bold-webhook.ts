@@ -151,7 +151,7 @@ export interface DonationWebhookData {
   amount: number;
   currency: string;
   tip: number;
-  status: DonationStatus;
+  boldStatus: DonationStatus;
   paymentMethod: string;
   integration: string;
   payerEmail: string;

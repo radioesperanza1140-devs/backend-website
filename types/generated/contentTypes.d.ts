@@ -546,6 +546,11 @@ export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 50;
       }>;
+    boldStatus: Schema.Attribute.Enumeration<
+      ['approved', 'pending', 'rejected', 'voided']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
     cardBrand: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 30;
@@ -601,11 +606,6 @@ export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
-    status: Schema.Attribute.Enumeration<
-      ['approved', 'pending', 'rejected', 'voided']
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'pending'>;
     tip: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

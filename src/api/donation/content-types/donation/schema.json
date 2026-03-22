@@ -14,50 +14,50 @@
   "attributes": {
     "donorFullName": {
       "type": "string",
-      "required": false,
-      "maxLength": 150
+      "maxLength": 150,
+      "required": false
     },
     "donorPhone": {
       "type": "string",
-      "required": false,
-      "maxLength": 20
+      "maxLength": 20,
+      "required": false
     },
     "donorIdentification": {
       "type": "string",
-      "required": false,
-      "maxLength": 30
+      "maxLength": 30,
+      "required": false
     },
     "donorIdentificationType": {
       "type": "enumeration",
+      "required": false,
       "enum": [
         "CC",
         "CE",
         "NIT",
         "PP",
         "TI"
-      ],
-      "required": false
+      ]
     },
     "boldPaymentId": {
       "type": "string",
+      "maxLength": 50,
       "required": false,
-      "unique": false,
-      "maxLength": 50
+      "unique": false
     },
     "boldNotificationId": {
       "type": "string",
-      "required": false,
-      "maxLength": 100
+      "maxLength": 100,
+      "required": false
     },
     "eventType": {
       "type": "enumeration",
+      "required": false,
       "enum": [
         "SALE_APPROVED",
         "SALE_REJECTED",
         "VOID_APPROVED",
         "VOID_REJECTED"
-      ],
-      "required": false
+      ]
     },
     "amount": {
       "type": "decimal",
@@ -66,35 +66,35 @@
     },
     "currency": {
       "type": "string",
-      "required": false,
       "default": "COP",
-      "maxLength": 3
+      "maxLength": 3,
+      "required": false
     },
     "tip": {
       "type": "decimal",
       "required": false,
       "default": 0
     },
-    "status": {
+    "boldStatus": {
       "type": "enumeration",
+      "required": true,
+      "default": "pending",
       "enum": [
         "approved",
         "pending",
         "rejected",
         "voided"
-      ],
-      "required": true,
-      "default": "pending"
+      ]
     },
     "paymentMethod": {
       "type": "string",
-      "required": false,
-      "maxLength": 30
+      "maxLength": 30,
+      "required": false
     },
     "integration": {
       "type": "string",
-      "required": false,
-      "maxLength": 30
+      "maxLength": 30,
+      "required": false
     },
     "payerEmail": {
       "type": "string",
@@ -102,18 +102,18 @@
     },
     "cardBrand": {
       "type": "string",
-      "required": false,
-      "maxLength": 30
+      "maxLength": 30,
+      "required": false
     },
     "cardMaskedPan": {
       "type": "string",
-      "required": false,
-      "maxLength": 20
+      "maxLength": 20,
+      "required": false
     },
     "reference": {
       "type": "string",
-      "required": false,
-      "maxLength": 100
+      "maxLength": 100,
+      "required": false
     },
     "rawPayload": {
       "type": "json",

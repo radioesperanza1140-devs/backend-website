@@ -69,7 +69,7 @@ export async function createPending(data: DonationPendingData) {
       currency: data.currency,
       payerEmail: data.payerEmail,
       reference: data.reference,
-      status: 'pending',
+      boldStatus: 'pending',
     },
   });
   strapi.log.info(`[DonationRepo] Donacion pendiente creada | documentId=${result.documentId}`);
@@ -106,7 +106,7 @@ export async function updateFromWebhook(documentId: string, data: DonationWebhoo
   strapi.log.info(
     `[DonationRepo] Actualizando desde webhook | ` +
     `documentId=${documentId} | paymentId=${data.boldPaymentId} | ` +
-    `event=${data.eventType} -> status=${data.status} | ` +
+    `event=${data.eventType} -> status=${data.boldStatus} | ` +
     `amount=${data.amount} ${data.currency}`
   );
   return strapi.documents(DONATION_UID).update({
@@ -115,7 +115,7 @@ export async function updateFromWebhook(documentId: string, data: DonationWebhoo
       boldPaymentId: data.boldPaymentId,
       boldNotificationId: data.boldNotificationId,
       eventType: data.eventType,
-      status: data.status,
+      status: data.boldStatus,
       amount: data.amount,
       tip: data.tip,
       paymentMethod: data.paymentMethod,
@@ -145,7 +145,7 @@ export async function createFromWebhook(data: DonationWebhookData) {
       amount: data.amount,
       currency: data.currency,
       tip: data.tip,
-      status: data.status,
+      boldStatus: data.boldStatus,
       paymentMethod: data.paymentMethod,
       integration: data.integration,
       payerEmail: data.payerEmail,

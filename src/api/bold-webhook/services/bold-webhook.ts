@@ -94,7 +94,7 @@ export default () => ({
       const updated = await donationRepo.updateFromWebhook(record.documentId, donationData);
       strapi.log.info(
         `[BoldWebhook] Donacion actualizada: ${record.documentId} | ` +
-        `${donationData.eventType} -> ${donationData.status}`
+        `${donationData.eventType} -> ${donationData.boldStatus}`
       );
       return { created: false, id: updated.id.toString() };
     }
